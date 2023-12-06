@@ -17,16 +17,16 @@
   "context": {
     "config": {
       "envs": {
-        "cicd": { "account": "300523423391", "region": "eu-west-3" },
-        "ml": { "account": "300523423391", "region": "eu-west-3" },
-        "iot": [{ "name": "dev", "account": "300523423391", "region": "eu-west-3" }]
+        "cicd": { "account": "958196000588", "region": "eu-west-3" },
+        "ml": { "account": "958196000588", "region": "eu-west-3" },
+        "iot": [{ "name": "dev", "account": "958196000588", "region": "eu-west-3" }]
       },
       "stUsernameSecret": "STDEVCLOUD_USERNAME_SECRET",
       "stPasswordSecret": "STDEVCLOUD_PASSWORD_SECRET",
       "repo": {
         "name": "nacimbc/aws-stm32-ml-at-edge-accelerator",
         "branch": "main",
-        "connectionArn": "arn:aws:codestar-connections:eu-west-3:300523423391:connection/06d30ebd-016b-4e43-9e5c-ac6fb02e17a3"
+        "connectionArn": "arn:aws:codestar-connections:eu-west-3:958196000588:connection/2e2f7d38-b526-452a-bee3-89a37426d044"
       }
     },
     "@aws-cdk/core:bootstrapQualifier": "stmicro",
