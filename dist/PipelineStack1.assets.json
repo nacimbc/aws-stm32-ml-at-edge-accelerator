@@ -1,0 +1,20 @@
+{
+  "version": "32.0.0",
+  "files": {
+    "6d72cc4bb498de9027db804df4dde793cdc9de8382aa449324bdc81cdb4b1edb": {
+      "source": {
+        "path": "PipelineStack1.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "958196000588-eu-west-3": {
+          "bucketName": "cdk-stmicro-assets-958196000588-eu-west-3",
+          "objectKey": "6d72cc4bb498de9027db804df4dde793cdc9de8382aa449324bdc81cdb4b1edb.json",
+          "region": "eu-west-3",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::958196000588:role/cdk-stmicro-file-publishing-role-958196000588-eu-west-3"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

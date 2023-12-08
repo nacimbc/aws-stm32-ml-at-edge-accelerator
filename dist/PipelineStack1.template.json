@@ -1,0 +1,2737 @@
+{
+ "Description": "AWS STM32 ML at Edge Accelerator (uksb-1tupboc18)",
+ "Resources": {
+  "PipelineLogGroup1CF6DEF2": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "RetentionInDays": 731
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/PipelineLogGroup/Resource"
+   }
+  },
+  "PipelineArtifactsBucketEncryptionKeyF5BF0670": {
+   "Type": "AWS::KMS::Key",
+   "Properties": {
+    "KeyPolicy": {
+     "Statement": [
+      {
+       "Action": "kms:*",
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": "arn:aws:iam::958196000588:root"
+       },
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "kms:Decrypt",
+        "kms:DescribeKey"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":iam::958196000588:role/cdk-stmicro-deploy-role-958196000588-eu-west-3"
+          ]
+         ]
+        }
+       },
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "EnableKeyRotation": true
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Pipeline/ArtifactsBucketEncryptionKey/Resource"
+   }
+  },
+  "PipelineArtifactsBucketEncryptionKeyAlias94A07392": {
+   "Type": "AWS::KMS::Alias",
+   "Properties": {
+    "AliasName": "alias/codepipeline-pipelinestack1-pipeline-31a3214b",
+    "TargetKeyId": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Pipeline/ArtifactsBucketEncryptionKeyAlias/Resource"
+   }
+  },
+  "PipelineArtifactsBucketAEA9A052": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "KMSMasterKeyID": {
+         "Fn::GetAtt": [
+          "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+          "Arn"
+         ]
+        },
+        "SSEAlgorithm": "aws:kms"
+       }
+      }
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Pipeline/ArtifactsBucket/Resource"
+   }
+  },
+  "PipelineArtifactsBucketPolicyF53CCC52": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "PipelineArtifactsBucketAEA9A052"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "s3:*",
+       "Condition": {
+        "Bool": {
+         "aws:SecureTransport": "false"
+        }
+       },
+       "Effect": "Deny",
+       "Principal": {
+        "AWS": "*"
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "PipelineArtifactsBucketAEA9A052",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "PipelineArtifactsBucketAEA9A052",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":iam::958196000588:role/cdk-stmicro-deploy-role-958196000588-eu-west-3"
+          ]
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "PipelineArtifactsBucketAEA9A052",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "PipelineArtifactsBucketAEA9A052",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Pipeline/ArtifactsBucket/Policy/Resource"
+   }
+  },
+  "PipelineRoleB27FAA37": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "codepipeline.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Pipeline/Role/Resource"
+   }
+  },
+  "PipelineRoleDefaultPolicy7BDC1ABB": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:Abort*",
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "PipelineArtifactsBucketAEA9A052",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "PipelineArtifactsBucketAEA9A052",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "kms:Decrypt",
+        "kms:DescribeKey",
+        "kms:Encrypt",
+        "kms:GenerateDataKey*",
+        "kms:ReEncrypt*"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineSourcenacimbcawsstm32mlatedgeacceleratorCodePipelineActionRoleC959BF6A",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":iam::958196000588:role/cdk-stmicro-deploy-role-958196000588-eu-west-3"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "PipelineRoleDefaultPolicy7BDC1ABB",
+    "Roles": [
+     {
+      "Ref": "PipelineRoleB27FAA37"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Pipeline/Role/DefaultPolicy/Resource"
+   }
+  },
+  "Pipeline9850B417": {
+   "Type": "AWS::CodePipeline::Pipeline",
+   "Properties": {
+    "RoleArn": {
+     "Fn::GetAtt": [
+      "PipelineRoleB27FAA37",
+      "Arn"
+     ]
+    },
+    "Stages": [
+     {
+      "Actions": [
+       {
+        "ActionTypeId": {
+         "Category": "Source",
+         "Owner": "AWS",
+         "Provider": "CodeStarSourceConnection",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ConnectionArn": "arn:aws:codestar-connections:eu-west-3:958196000588:connection/2e2f7d38-b526-452a-bee3-89a37426d044",
+         "FullRepositoryId": "nacimbc/aws-stm32-ml-at-edge-accelerator",
+         "BranchName": "main"
+        },
+        "Name": "nacimbc_aws-stm32-ml-at-edge-accelerator",
+        "OutputArtifacts": [
+         {
+          "Name": "nacimbc_aws_stm32_ml_at_edge_accelerator_Source"
+         }
+        ],
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineSourcenacimbcawsstm32mlatedgeacceleratorCodePipelineActionRoleC959BF6A",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       }
+      ],
+      "Name": "Source"
+     },
+     {
+      "Actions": [
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineBuildSynthStepCdkBuildProject7FBB5116"
+         },
+         "EnvironmentVariables": "[{\"name\":\"_PROJECT_CONFIG_HASH\",\"type\":\"PLAINTEXT\",\"value\":\"c6acbd2ca57e515e648b67c4cde8a5229c58ec4b4ade605a24592500f3a828e2\"}]"
+        },
+        "InputArtifacts": [
+         {
+          "Name": "nacimbc_aws_stm32_ml_at_edge_accelerator_Source"
+         }
+        ],
+        "Name": "SynthStep",
+        "OutputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       }
+      ],
+      "Name": "Build"
+     },
+     {
+      "Actions": [
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineUpdatePipelineSelfMutationDAA41400"
+         },
+         "EnvironmentVariables": "[{\"name\":\"_PROJECT_CONFIG_HASH\",\"type\":\"PLAINTEXT\",\"value\":\"5ef00308e71987c557c8e591ededa0031d3cc1d9e7e156c0c55d6efda04011cf\"}]"
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "SelfMutate",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       }
+      ],
+      "Name": "UpdatePipeline"
+     },
+     {
+      "Actions": [
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineAssetsFileAsset185A67CB4"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "FileAsset1",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineAssetsFileAsset102484C317"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "FileAsset10",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineAssetsFileAsset11D534F05C"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "FileAsset11",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineAssetsFileAsset12E916E136"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "FileAsset12",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineAssetsFileAsset13BC3E73E7"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "FileAsset13",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineAssetsFileAsset14A3CA232F"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "FileAsset14",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineAssetsFileAsset15B22B8501"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "FileAsset15",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineAssetsFileAsset161A3A5D08"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "FileAsset16",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineAssetsFileAsset172B1ABD63"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "FileAsset17",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineAssetsFileAsset24D2D639B"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "FileAsset2",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineAssetsFileAsset3FE71B523"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "FileAsset3",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineAssetsFileAsset474303B7D"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "FileAsset4",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineAssetsFileAsset5184A5C2F"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "FileAsset5",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineAssetsFileAsset669C72F3C"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "FileAsset6",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineAssetsFileAsset7A51C54D0"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "FileAsset7",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineAssetsFileAsset81DAB433B"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "FileAsset8",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Build",
+         "Owner": "AWS",
+         "Provider": "CodeBuild",
+         "Version": "1"
+        },
+        "Configuration": {
+         "ProjectName": {
+          "Ref": "PipelineAssetsFileAsset9F08741A2"
+         }
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "FileAsset9",
+        "RoleArn": {
+         "Fn::GetAtt": [
+          "PipelineCodeBuildActionRole226DB0CB",
+          "Arn"
+         ]
+        },
+        "RunOrder": 1
+       }
+      ],
+      "Name": "Assets"
+     },
+     {
+      "Actions": [
+       {
+        "ActionTypeId": {
+         "Category": "Deploy",
+         "Owner": "AWS",
+         "Provider": "CloudFormation",
+         "Version": "1"
+        },
+        "Configuration": {
+         "StackName": "MlStage-MlStack",
+         "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
+         "RoleArn": {
+          "Fn::Join": [
+           "",
+           [
+            "arn:",
+            {
+             "Ref": "AWS::Partition"
+            },
+            ":iam::958196000588:role/cdk-stmicro-cfn-exec-role-958196000588-eu-west-3"
+           ]
+          ]
+         },
+         "ActionMode": "CHANGE_SET_REPLACE",
+         "ChangeSetName": "PipelineChange",
+         "TemplatePath": "SynthStep_Output::assembly-PipelineStack1-MlStage/PipelineStack1MlStageMlStackB823DB3E.template.json"
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "Prepare",
+        "RoleArn": {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":iam::958196000588:role/cdk-stmicro-deploy-role-958196000588-eu-west-3"
+          ]
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Deploy",
+         "Owner": "AWS",
+         "Provider": "CloudFormation",
+         "Version": "1"
+        },
+        "Configuration": {
+         "StackName": "MlStage-MlStack",
+         "ActionMode": "CHANGE_SET_EXECUTE",
+         "ChangeSetName": "PipelineChange"
+        },
+        "Name": "Deploy",
+        "RoleArn": {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":iam::958196000588:role/cdk-stmicro-deploy-role-958196000588-eu-west-3"
+          ]
+         ]
+        },
+        "RunOrder": 2
+       }
+      ],
+      "Name": "MlStage"
+     },
+     {
+      "Actions": [
+       {
+        "ActionTypeId": {
+         "Category": "Deploy",
+         "Owner": "AWS",
+         "Provider": "CloudFormation",
+         "Version": "1"
+        },
+        "Configuration": {
+         "StackName": "IotStage-dev-IotStack",
+         "Capabilities": "CAPABILITY_NAMED_IAM,CAPABILITY_AUTO_EXPAND",
+         "RoleArn": {
+          "Fn::Join": [
+           "",
+           [
+            "arn:",
+            {
+             "Ref": "AWS::Partition"
+            },
+            ":iam::958196000588:role/cdk-stmicro-cfn-exec-role-958196000588-eu-west-3"
+           ]
+          ]
+         },
+         "ActionMode": "CHANGE_SET_REPLACE",
+         "ChangeSetName": "PipelineChange",
+         "TemplatePath": "SynthStep_Output::assembly-PipelineStack1-IotStage-dev/PipelineStack1IotStagedevIotStack42356994.template.json"
+        },
+        "InputArtifacts": [
+         {
+          "Name": "SynthStep_Output"
+         }
+        ],
+        "Name": "Prepare",
+        "RoleArn": {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":iam::958196000588:role/cdk-stmicro-deploy-role-958196000588-eu-west-3"
+          ]
+         ]
+        },
+        "RunOrder": 1
+       },
+       {
+        "ActionTypeId": {
+         "Category": "Deploy",
+         "Owner": "AWS",
+         "Provider": "CloudFormation",
+         "Version": "1"
+        },
+        "Configuration": {
+         "StackName": "IotStage-dev-IotStack",
+         "ActionMode": "CHANGE_SET_EXECUTE",
+         "ChangeSetName": "PipelineChange"
+        },
+        "Name": "Deploy",
+        "RoleArn": {
+         "Fn::Join": [
+          "",
+          [
+           "arn:",
+           {
+            "Ref": "AWS::Partition"
+           },
+           ":iam::958196000588:role/cdk-stmicro-deploy-role-958196000588-eu-west-3"
+          ]
+         ]
+        },
+        "RunOrder": 2
+       }
+      ],
+      "Name": "IotStage-dev"
+     }
+    ],
+    "ArtifactStore": {
+     "EncryptionKey": {
+      "Id": {
+       "Fn::GetAtt": [
+        "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+        "Arn"
+       ]
+      },
+      "Type": "KMS"
+     },
+     "Location": {
+      "Ref": "PipelineArtifactsBucketAEA9A052"
+     },
+     "Type": "S3"
+    },
+    "Name": "StMicroPipeline",
+    "RestartExecutionOnUpdate": true
+   },
+   "DependsOn": [
+    "PipelineRoleDefaultPolicy7BDC1ABB",
+    "PipelineRoleB27FAA37"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Pipeline/Resource"
+   }
+  },
+  "PipelineSourcenacimbcawsstm32mlatedgeacceleratorCodePipelineActionRoleC959BF6A": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": "arn:aws:iam::958196000588:root"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Pipeline/Source/nacimbc_aws-stm32-ml-at-edge-accelerator/CodePipelineActionRole/Resource"
+   }
+  },
+  "PipelineSourcenacimbcawsstm32mlatedgeacceleratorCodePipelineActionRoleDefaultPolicyB82118E0": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "codestar-connections:UseConnection",
+       "Effect": "Allow",
+       "Resource": "arn:aws:codestar-connections:eu-west-3:958196000588:connection/2e2f7d38-b526-452a-bee3-89a37426d044"
+      },
+      {
+       "Action": [
+        "s3:Abort*",
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "PipelineArtifactsBucketAEA9A052",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "PipelineArtifactsBucketAEA9A052",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "kms:Decrypt",
+        "kms:DescribeKey",
+        "kms:Encrypt",
+        "kms:GenerateDataKey*",
+        "kms:ReEncrypt*"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": [
+        "s3:PutObjectAcl",
+        "s3:PutObjectVersionAcl"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "PipelineArtifactsBucketAEA9A052",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "PipelineSourcenacimbcawsstm32mlatedgeacceleratorCodePipelineActionRoleDefaultPolicyB82118E0",
+    "Roles": [
+     {
+      "Ref": "PipelineSourcenacimbcawsstm32mlatedgeacceleratorCodePipelineActionRoleC959BF6A"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Pipeline/Source/nacimbc_aws-stm32-ml-at-edge-accelerator/CodePipelineActionRole/DefaultPolicy/Resource"
+   }
+  },
+  "PipelineBuildSynthStepCdkBuildProjectRole2407DBD0": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "codebuild.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Pipeline/Build/SynthStep/CdkBuildProject/Role/Resource"
+   }
+  },
+  "PipelineBuildSynthStepCdkBuildProjectRoleDefaultPolicy3CD6B151": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "PipelineLogGroup1CF6DEF2",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:aws:logs:eu-west-3:958196000588:log-group:/aws/codebuild/",
+           {
+            "Ref": "PipelineBuildSynthStepCdkBuildProject7FBB5116"
+           },
+           ":*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:aws:logs:eu-west-3:958196000588:log-group:/aws/codebuild/",
+           {
+            "Ref": "PipelineBuildSynthStepCdkBuildProject7FBB5116"
+           }
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "codebuild:BatchPutCodeCoverages",
+        "codebuild:BatchPutTestCases",
+        "codebuild:CreateReport",
+        "codebuild:CreateReportGroup",
+        "codebuild:UpdateReport"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          "arn:aws:codebuild:eu-west-3:958196000588:report-group/",
+          {
+           "Ref": "PipelineBuildSynthStepCdkBuildProject7FBB5116"
+          },
+          "-*"
+         ]
+        ]
+       }
+      },
+      {
+       "Action": [
+        "s3:Abort*",
+        "s3:DeleteObject*",
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "PipelineArtifactsBucketAEA9A052",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "PipelineArtifactsBucketAEA9A052",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "kms:Decrypt",
+        "kms:DescribeKey",
+        "kms:Encrypt",
+        "kms:GenerateDataKey*",
+        "kms:ReEncrypt*"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "PipelineBuildSynthStepCdkBuildProjectRoleDefaultPolicy3CD6B151",
+    "Roles": [
+     {
+      "Ref": "PipelineBuildSynthStepCdkBuildProjectRole2407DBD0"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Pipeline/Build/SynthStep/CdkBuildProject/Role/DefaultPolicy/Resource"
+   }
+  },
+  "PipelineBuildSynthStepCdkBuildProject7FBB5116": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": true,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineBuildSynthStepCdkBuildProjectRole2407DBD0",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"build\": {\n      \"commands\": [\n        \"npm ci\",\n        \"npm run cdk synth\",\n        \"ls\"\n      ]\n    }\n  },\n  \"artifacts\": {\n    \"base-directory\": \"cdk.out\",\n    \"files\": \"**/*\"\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/Build/SynthStep",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Pipeline/Build/SynthStep/CdkBuildProject/Resource"
+   }
+  },
+  "PipelineCodeBuildActionRole226DB0CB": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "PipelineRoleB27FAA37",
+          "Arn"
+         ]
+        }
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/CodeBuildActionRole/Resource"
+   }
+  },
+  "PipelineCodeBuildActionRoleDefaultPolicy1D62A6FE": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "codebuild:BatchGetBuilds",
+        "codebuild:StartBuild",
+        "codebuild:StopBuild"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "PipelineAssetsFileAsset102484C317",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineAssetsFileAsset11D534F05C",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineAssetsFileAsset12E916E136",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineAssetsFileAsset13BC3E73E7",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineAssetsFileAsset14A3CA232F",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineAssetsFileAsset15B22B8501",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineAssetsFileAsset161A3A5D08",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineAssetsFileAsset172B1ABD63",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineAssetsFileAsset185A67CB4",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineAssetsFileAsset24D2D639B",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineAssetsFileAsset3FE71B523",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineAssetsFileAsset474303B7D",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineAssetsFileAsset5184A5C2F",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineAssetsFileAsset669C72F3C",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineAssetsFileAsset7A51C54D0",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineAssetsFileAsset81DAB433B",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineAssetsFileAsset9F08741A2",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineBuildSynthStepCdkBuildProject7FBB5116",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "PipelineUpdatePipelineSelfMutationDAA41400",
+          "Arn"
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "PipelineCodeBuildActionRoleDefaultPolicy1D62A6FE",
+    "Roles": [
+     {
+      "Ref": "PipelineCodeBuildActionRole226DB0CB"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/CodeBuildActionRole/DefaultPolicy/Resource"
+   }
+  },
+  "PipelineUpdatePipelineSelfMutationRole57E559E8": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "codebuild.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/UpdatePipeline/SelfMutation/Role/Resource"
+   }
+  },
+  "PipelineUpdatePipelineSelfMutationRoleDefaultPolicyA225DA4E": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "PipelineLogGroup1CF6DEF2",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:aws:logs:eu-west-3:958196000588:log-group:/aws/codebuild/",
+           {
+            "Ref": "PipelineUpdatePipelineSelfMutationDAA41400"
+           },
+           ":*"
+          ]
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           "arn:aws:logs:eu-west-3:958196000588:log-group:/aws/codebuild/",
+           {
+            "Ref": "PipelineUpdatePipelineSelfMutationDAA41400"
+           }
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "codebuild:BatchPutCodeCoverages",
+        "codebuild:BatchPutTestCases",
+        "codebuild:CreateReport",
+        "codebuild:CreateReportGroup",
+        "codebuild:UpdateReport"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          "arn:aws:codebuild:eu-west-3:958196000588:report-group/",
+          {
+           "Ref": "PipelineUpdatePipelineSelfMutationDAA41400"
+          },
+          "-*"
+         ]
+        ]
+       }
+      },
+      {
+       "Action": "sts:AssumeRole",
+       "Condition": {
+        "ForAnyValue:StringEquals": {
+         "iam:ResourceTag/aws-cdk:bootstrap-role": [
+          "image-publishing",
+          "file-publishing",
+          "deploy"
+         ]
+        }
+       },
+       "Effect": "Allow",
+       "Resource": "arn:*:iam::958196000588:role/*"
+      },
+      {
+       "Action": [
+        "cloudformation:DescribeStacks",
+        "s3:ListBucket"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "PipelineArtifactsBucketAEA9A052",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "PipelineArtifactsBucketAEA9A052",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "kms:Decrypt",
+        "kms:DescribeKey",
+        "kms:Encrypt",
+        "kms:GenerateDataKey*",
+        "kms:ReEncrypt*"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "PipelineUpdatePipelineSelfMutationRoleDefaultPolicyA225DA4E",
+    "Roles": [
+     {
+      "Ref": "PipelineUpdatePipelineSelfMutationRole57E559E8"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/UpdatePipeline/SelfMutation/Role/DefaultPolicy/Resource"
+   }
+  },
+  "PipelineUpdatePipelineSelfMutationDAA41400": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineUpdatePipelineSelfMutationRole57E559E8",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"install\": {\n      \"commands\": [\n        \"npm install -g aws-cdk@2\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cdk -a . deploy PipelineStack1 --require-approval=never --verbose\"\n      ]\n    }\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/UpdatePipeline/SelfMutate",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    },
+    "Name": "StMicroPipeline-selfupdate"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/UpdatePipeline/SelfMutation/Resource"
+   }
+  },
+  "PipelineAssetsFileRole59943A77": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": "arn:aws:iam::958196000588:root",
+        "Service": "codebuild.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileRole/Resource"
+   }
+  },
+  "PipelineAssetsFileRoleDefaultPolicy14DB8755": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": "arn:aws:logs:eu-west-3:958196000588:log-group:/aws/codebuild/*"
+      },
+      {
+       "Action": [
+        "codebuild:BatchPutCodeCoverages",
+        "codebuild:BatchPutTestCases",
+        "codebuild:CreateReport",
+        "codebuild:CreateReportGroup",
+        "codebuild:UpdateReport"
+       ],
+       "Effect": "Allow",
+       "Resource": "arn:aws:codebuild:eu-west-3:958196000588:report-group/*"
+      },
+      {
+       "Action": [
+        "codebuild:BatchGetBuilds",
+        "codebuild:StartBuild",
+        "codebuild:StopBuild"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Sub": "arn:${AWS::Partition}:iam::958196000588:role/cdk-stmicro-file-publishing-role-958196000588-eu-west-3"
+       }
+      },
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "PipelineLogGroup1CF6DEF2",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": [
+        "s3:GetBucket*",
+        "s3:GetObject*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "PipelineArtifactsBucketAEA9A052",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "PipelineArtifactsBucketAEA9A052",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "kms:Decrypt",
+        "kms:DescribeKey"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "PipelineAssetsFileRoleDefaultPolicy14DB8755",
+    "Roles": [
+     {
+      "Ref": "PipelineAssetsFileRole59943A77"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileRole/DefaultPolicy/Resource"
+   }
+  },
+  "PipelineAssetsFileAsset185A67CB4": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineAssetsFileRole59943A77",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"install\": {\n      \"commands\": [\n        \"npm install -g cdk-assets@2\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cdk-assets --path \\\"assembly-PipelineStack1-MlStage/PipelineStack1MlStageMlStackB823DB3E.assets.json\\\" --verbose publish \\\"f9346b940b724b094a16ca051c017799995fa93df6da38a0539bf7c000fee50a:958196000588-eu-west-3\\\"\"\n      ]\n    }\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/Assets/FileAsset1",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileAsset1/Resource"
+   }
+  },
+  "PipelineAssetsFileAsset102484C317": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineAssetsFileRole59943A77",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"install\": {\n      \"commands\": [\n        \"npm install -g cdk-assets@2\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cdk-assets --path \\\"assembly-PipelineStack1-IotStage-dev/PipelineStack1IotStagedevIotStack42356994.assets.json\\\" --verbose publish \\\"badf25698ef9e79d486bd8ad13e549825c780cf80a61dab63e6cc4d1b9b7a997:958196000588-eu-west-3\\\"\"\n      ]\n    }\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/Assets/FileAsset10",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileAsset10/Resource"
+   }
+  },
+  "PipelineAssetsFileAsset11D534F05C": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineAssetsFileRole59943A77",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"install\": {\n      \"commands\": [\n        \"npm install -g cdk-assets@2\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cdk-assets --path \\\"assembly-PipelineStack1-IotStage-dev/PipelineStack1IotStagedevIotStack42356994.assets.json\\\" --verbose publish \\\"023f4a2033ce99e386a3b791a64f168e449e1cef92a1e6ec2b29c1a029f8d3cc:958196000588-eu-west-3\\\"\"\n      ]\n    }\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/Assets/FileAsset11",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileAsset11/Resource"
+   }
+  },
+  "PipelineAssetsFileAsset12E916E136": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineAssetsFileRole59943A77",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"install\": {\n      \"commands\": [\n        \"npm install -g cdk-assets@2\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cdk-assets --path \\\"assembly-PipelineStack1-IotStage-dev/PipelineStack1IotStagedevIotStack42356994.assets.json\\\" --verbose publish \\\"04c4ddffba72e7a512e62b1f9bba16ab62e36348bcaeec6a74754c22c1d5ec3a:958196000588-eu-west-3\\\"\"\n      ]\n    }\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/Assets/FileAsset12",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileAsset12/Resource"
+   }
+  },
+  "PipelineAssetsFileAsset13BC3E73E7": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineAssetsFileRole59943A77",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"install\": {\n      \"commands\": [\n        \"npm install -g cdk-assets@2\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cdk-assets --path \\\"assembly-PipelineStack1-IotStage-dev/PipelineStack1IotStagedevIotStack42356994.assets.json\\\" --verbose publish \\\"32bc803a1df18e05d70af253972e1dc7d2b48170c64b41fa75149aff0419d2ac:958196000588-eu-west-3\\\"\"\n      ]\n    }\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/Assets/FileAsset13",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileAsset13/Resource"
+   }
+  },
+  "PipelineAssetsFileAsset14A3CA232F": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineAssetsFileRole59943A77",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"install\": {\n      \"commands\": [\n        \"npm install -g cdk-assets@2\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cdk-assets --path \\\"assembly-PipelineStack1-IotStage-dev/PipelineStack1IotStagedevIotStack42356994.assets.json\\\" --verbose publish \\\"0a3bd3f508c969584a61316069ada559ef454e56983c566a2fe2f1e30423e248:958196000588-eu-west-3\\\"\"\n      ]\n    }\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/Assets/FileAsset14",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileAsset14/Resource"
+   }
+  },
+  "PipelineAssetsFileAsset15B22B8501": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineAssetsFileRole59943A77",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"install\": {\n      \"commands\": [\n        \"npm install -g cdk-assets@2\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cdk-assets --path \\\"assembly-PipelineStack1-IotStage-dev/PipelineStack1IotStagedevIotStack42356994.assets.json\\\" --verbose publish \\\"b6781238fc3ace8ef655fd66333b964d3cca61f0c9c97e001fa9eb80953c3dd0:958196000588-eu-west-3\\\"\"\n      ]\n    }\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/Assets/FileAsset15",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileAsset15/Resource"
+   }
+  },
+  "PipelineAssetsFileAsset161A3A5D08": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineAssetsFileRole59943A77",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"install\": {\n      \"commands\": [\n        \"npm install -g cdk-assets@2\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cdk-assets --path \\\"assembly-PipelineStack1-IotStage-dev/PipelineStack1IotStagedevIotStack42356994.assets.json\\\" --verbose publish \\\"acbe478ca426c517e29302bbb4fb5cf606e260b27df8fe9fc9f18a8ed7b65126:958196000588-eu-west-3\\\"\"\n      ]\n    }\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/Assets/FileAsset16",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileAsset16/Resource"
+   }
+  },
+  "PipelineAssetsFileAsset172B1ABD63": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineAssetsFileRole59943A77",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"install\": {\n      \"commands\": [\n        \"npm install -g cdk-assets@2\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cdk-assets --path \\\"assembly-PipelineStack1-IotStage-dev/PipelineStack1IotStagedevIotStack42356994.assets.json\\\" --verbose publish \\\"c36af496a0a38ccedf3623134db7345837cbedca375d819ec3d9b5f5144cef7a:958196000588-eu-west-3\\\"\"\n      ]\n    }\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/Assets/FileAsset17",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileAsset17/Resource"
+   }
+  },
+  "PipelineAssetsFileAsset24D2D639B": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineAssetsFileRole59943A77",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"install\": {\n      \"commands\": [\n        \"npm install -g cdk-assets@2\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cdk-assets --path \\\"assembly-PipelineStack1-MlStage/PipelineStack1MlStageMlStackB823DB3E.assets.json\\\" --verbose publish \\\"350185a1069fa20a23a583e20c77f6844218bd73097902362dc94f1a108f5d89:958196000588-eu-west-3\\\"\"\n      ]\n    }\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/Assets/FileAsset2",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileAsset2/Resource"
+   }
+  },
+  "PipelineAssetsFileAsset3FE71B523": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineAssetsFileRole59943A77",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"install\": {\n      \"commands\": [\n        \"npm install -g cdk-assets@2\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cdk-assets --path \\\"assembly-PipelineStack1-MlStage/PipelineStack1MlStageMlStackB823DB3E.assets.json\\\" --verbose publish \\\"bd0f0f7a29a02dcdba929ee16af2c7727b93d9aa52fa294a71b667c88cd0b7d1:958196000588-eu-west-3\\\"\"\n      ]\n    }\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/Assets/FileAsset3",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileAsset3/Resource"
+   }
+  },
+  "PipelineAssetsFileAsset474303B7D": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineAssetsFileRole59943A77",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"install\": {\n      \"commands\": [\n        \"npm install -g cdk-assets@2\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cdk-assets --path \\\"assembly-PipelineStack1-MlStage/PipelineStack1MlStageMlStackB823DB3E.assets.json\\\" --verbose publish \\\"d5eb756649175caf4fb7cd527f332ca407b4697e17fd78bdc4f2dd60da8473e6:958196000588-eu-west-3\\\"\"\n      ]\n    }\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/Assets/FileAsset4",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileAsset4/Resource"
+   }
+  },
+  "PipelineAssetsFileAsset5184A5C2F": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineAssetsFileRole59943A77",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"install\": {\n      \"commands\": [\n        \"npm install -g cdk-assets@2\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cdk-assets --path \\\"assembly-PipelineStack1-MlStage/PipelineStack1MlStageMlStackB823DB3E.assets.json\\\" --verbose publish \\\"e1edcf66bf497ac3c6a872e9a59b9e3c45a33e48e9deb2d785e6d14c12c7ec20:958196000588-eu-west-3\\\"\"\n      ]\n    }\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/Assets/FileAsset5",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileAsset5/Resource"
+   }
+  },
+  "PipelineAssetsFileAsset669C72F3C": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineAssetsFileRole59943A77",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"install\": {\n      \"commands\": [\n        \"npm install -g cdk-assets@2\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cdk-assets --path \\\"assembly-PipelineStack1-MlStage/PipelineStack1MlStageMlStackB823DB3E.assets.json\\\" --verbose publish \\\"e8adfc80603cbf0b8f56fd639b6444aeb86502537f92274026a04ae0d0d2574f:958196000588-eu-west-3\\\"\"\n      ]\n    }\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/Assets/FileAsset6",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileAsset6/Resource"
+   }
+  },
+  "PipelineAssetsFileAsset7A51C54D0": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineAssetsFileRole59943A77",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"install\": {\n      \"commands\": [\n        \"npm install -g cdk-assets@2\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cdk-assets --path \\\"assembly-PipelineStack1-MlStage/PipelineStack1MlStageMlStackB823DB3E.assets.json\\\" --verbose publish \\\"87550c5598fa092ac39d7286c3d263979c906af96daad9be2b57b4c9d5adfd5a:958196000588-eu-west-3\\\"\"\n      ]\n    }\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/Assets/FileAsset7",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileAsset7/Resource"
+   }
+  },
+  "PipelineAssetsFileAsset81DAB433B": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineAssetsFileRole59943A77",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"install\": {\n      \"commands\": [\n        \"npm install -g cdk-assets@2\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cdk-assets --path \\\"assembly-PipelineStack1-IotStage-dev/PipelineStack1IotStagedevIotStack42356994.assets.json\\\" --verbose publish \\\"d812c546db0f2e278384fe6028cfa3b55c6c0b9df2fd993741c6d276480d16e3:958196000588-eu-west-3\\\"\"\n      ]\n    }\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/Assets/FileAsset8",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileAsset8/Resource"
+   }
+  },
+  "PipelineAssetsFileAsset9F08741A2": {
+   "Type": "AWS::CodeBuild::Project",
+   "Properties": {
+    "Artifacts": {
+     "Type": "CODEPIPELINE"
+    },
+    "Environment": {
+     "ComputeType": "BUILD_GENERAL1_SMALL",
+     "Image": "aws/codebuild/standard:6.0",
+     "ImagePullCredentialsType": "CODEBUILD",
+     "PrivilegedMode": false,
+     "Type": "LINUX_CONTAINER"
+    },
+    "ServiceRole": {
+     "Fn::GetAtt": [
+      "PipelineAssetsFileRole59943A77",
+      "Arn"
+     ]
+    },
+    "Source": {
+     "BuildSpec": "{\n  \"version\": \"0.2\",\n  \"phases\": {\n    \"install\": {\n      \"commands\": [\n        \"npm install -g cdk-assets@2\"\n      ]\n    },\n    \"build\": {\n      \"commands\": [\n        \"cdk-assets --path \\\"assembly-PipelineStack1-IotStage-dev/PipelineStack1IotStagedevIotStack42356994.assets.json\\\" --verbose publish \\\"8e3d635893ea17fa3158623489cd42c680fad925b38de1ef51cb10d84f6e245e:958196000588-eu-west-3\\\"\"\n      ]\n    }\n  }\n}",
+     "Type": "CODEPIPELINE"
+    },
+    "Cache": {
+     "Type": "NO_CACHE"
+    },
+    "Description": "Pipeline step PipelineStack1/Pipeline/Assets/FileAsset9",
+    "EncryptionKey": {
+     "Fn::GetAtt": [
+      "PipelineArtifactsBucketEncryptionKeyF5BF0670",
+      "Arn"
+     ]
+    },
+    "LogsConfig": {
+     "CloudWatchLogs": {
+      "GroupName": {
+       "Ref": "PipelineLogGroup1CF6DEF2"
+      },
+      "Status": "ENABLED"
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/Pipeline/Assets/FileAsset9/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/0WQzW7DIBCEn8V3vI2bQ3Ntc+ihPViulGtFgFhrY7DAJIoQ715+7Foc5tvRoB14hdMRDhV92JrxsZZ4Bf+zUDaSaP16qXsL/lv3n0a7mZxvauNAmOZixllIVAJ8u1LKbBzIOMXrX+KZ3CTvEqlNQ4ZA7BH8h2OjWJK5UpFWS2TP3S5zIEgn8J2WeVPWPbllUrWrQ8n3Xq3Rg2B5zYohkK2+hXO88f+ETljtDCsbVg5ExQgM9uXenKB5g6YaLGJtnFpwEtAVJQeIp5pzkQuVyOmCWkH63HsZtanZTfWOGv4HRMMrDH4BAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "PipelineStack1/CDKMetadata/Default"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/stmicro/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}
